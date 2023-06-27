@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Insert title here</title>
+        <link href="/stylesheets/boardStyle.css" rel="stylesheet" type="text/css"/>
+        <style>
+            section nav ul li:nth-child(3) {
+                background: mistyrose;
+            }
+
+            #btnReturnToList,
+            #btnWrite {
+                width: 100px;
+                height: 30px;
+                border: none;
+                background: mistyrose;
+            }
+            
+        </style>
+        <style>
+            div.preview-images > img {
+              width: 30%;
+            }
+          </style>
+    </head>
+    <body>
+        {%- include("../../include/userHeader.html")%}
+        <section>
+            <div id="detailDiv">
+                <div>
+                    <br>
+                    <p>고객님들의 소중한 의견을 들려주세요.2222
+                    </p>
+                    <br>
+                    <br><br>
+                </div>
+                <div id="detailContent">
+                    <form
+                        action="tourlandCustBoardRegister"
+                        method="post"
+                        id="custBoardForm"
+                        enctype="multipart/form-data">
+
+                        <p>
+                            <label>작성자</label>
+                            {% if user %}
+                                <input
+                                    type="text"
+                                    name="userid"
+                                    id="userid"
+                                    value="{{user.username}}"
+                                    readonly="readonly">
+                            {% else %}
+                            <input
+                            size=20
+                            type="text"
+                            name="userid"
+                            id="userid"
+                            style="border:none; border-bottom:1px solid black; width:400px;"
+                            >
+                            {% endif %}
+
+                        </p>
+                        <p>
+                            <label>제목</label>
+                            <input
+                                type="text"
+                                name="title"
+                                class="form-control"
+                                id="title"
+                                required="required"
+                                style="border:none; border-bottom:1px solid black; width:400px;">
+                        </p>
+                        <p>
+                            <label>내용</label>
+                            <textarea
+                                rows="15"
+                                cols="100"
+                                style="margin-top:10px;"
+                                placeholder="  내용을 입력하세요"
+                                name="content"
+                                id="content"
+                                class="form-control"
+                                required="required">{{custBoardVO.content}}</textarea>
+                        </p>
+                        <p> <label>비밀번호 설정</label> 
+                            <input type="password" name="password" id="password" class="form-control" required="required"> </p><br>
+                        <label>이미지 첨부하기</label><br>
+                        <input type="file" name="multi-files" multiple id="input-multi-files" class="form-control-file border"/>
+                        <br>
+                        <div>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="btnWrite">등록</button>
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                id="btnReturnToList">목록으로</button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+
+        </section>
+        <script>
+            $(document).ready(function() {
+              let imagesPreview = function(input, placeToInsertImagePreview) {
+                if (input.files) {
+                  let filesAmount = input.files.length;
+                  for (i = 0; i < filesAmount; i++) {
+                    let reader = new FileReader();
+                    reader.onload = function(event) {
+                      $($.parseHTML("<img>"))
+                        .attr("src", event.target.result)
+                        .appendTo(placeToInsertImagePreview);
+                    };
+                    reader.readAsDataURL(input.files[i]);
+                  }
+                }
+              };
+              $("#input-multi-files").on("change", function() {
+                imagesPreview(this, "div.preview-images");
+              });
+            });
+      
+      
+            const form = document.querySelector('form');
+            const userIdInput = document.querySelector('#userid');
+            const titleInput = document.querySelector('#title');
+            const contentInput = document.querySelector('#content');
+            const passwordInput = document.querySelector('#password');
+            const fileInput = document.querySelector('#input-multi-files');
+      
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+      
+              const formData = new FormData();
+              formData.append('boardtype', "custboard");
+              formData.append('userid', userIdInput.value);
+              formData.append('title', titleInput.value);
+              formData.append('content', contentInput.value);
+              formData.append('password', passwordInput.value);
+              for (const file of fileInput.files) {
+                formData.append('files', file);
+              }
+      
+              try {
+                const response = await axios.post('/customer/tourlandCustBoardRegister', formData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data',
+                  },
+                });
+                console.log(response.data);
+                location.href="/customer/tourlandCustBoard";
+              } catch (error) {
+                console.error(error);
+              }
+            });
+      
+          </script>
+        {%- include("../../include/userFooter.html")%}
+    </body>
+</html>

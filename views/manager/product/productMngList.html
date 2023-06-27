@@ -1,0 +1,146 @@
+{%- include ("../../include/header.html") %}
+<style>
+    .table th, td {
+        text-align: center;
+    }
+
+    .pagination {
+        margin-left: 650px;
+    }
+
+    .active {
+        background-color: lightblue;
+        color: white;
+    }
+
+    .productList:hover {
+        cursor: pointer;
+        background-color: lightgrey;
+    }
+
+    #prev, #next {
+        padding-top: 40px;
+    }
+</style>
+<div class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h2 class="box-title">상품 리스트</h2>
+                </div>
+                <div class="box-body">
+                    <select name="searchType" id="searchType">
+                        <option value="N"        {%if cri.searchType=='N'       %}'selected'{%else%}'' {%endif%}>----------</option>
+                        <option value="name"     {%if cri.searchType=='name'    %}'selected'{%else%}'' {%endif%}>상품제목</option>
+                        <option value="expire"   {%if cri.searchType=='expire'  %}'selected'{%else%}'' {%endif%}>유효기간</option>
+                        <option value="location" {%if cri.searchType=='location'%}'selected'{%else%}'' {%endif%}>지역</option>
+                    </select>
+                    <input type="text" name="keyword" id="keywordInput" value="{{cri.keyword }}">
+                    <button id="btnSearch">Search</button>
+                </div>
+                <div class="box-body">
+                    <button id="btnRegister">추가</button>
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>번호</th>
+                            <th>상품제목</th>
+                            <th>항공편명</th>
+                            <th>호텔상품</th>
+                            <th>투어상품</th>
+                            <th>렌트카상품</th>
+                            <th>상품유효기간</th>
+                            <th>가격</th>
+                        </tr>
+                        {% for product in lists %}
+                        <tr class="productList" data-no="{{product.id }}">
+                            <td>{{product.id }}</td>
+                            <td>{{product.pname }}</td>
+                            <td>
+                                {% for air in  product.airplaneId_airplanes %}
+                                    {{air.ano }}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for hotel in product.hotelId_hotels %}
+                                    <p>
+                                        {{hotel.hname }}
+                                    </p>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for tour in product.tourId_tours %}
+                                    <p>
+                                        {{tour.tname }}
+                                    </p>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for rentcar in product.rentcarId_rentcars %}
+                                    <p>
+                                        {% if  rentcar.cdiv === 'L' %} '경차' 
+                                        {% elif rentcar.cdiv === 'S' %} '세단' 
+                                        {% elif rentcar.cdiv === 'U' %} 'SUV' 
+                                        {% elif rentcar.cdiv === 'V' %} '밴' 
+                                        {% else %}'버스' 
+                                        {% endif %}
+                                    </p>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {{product.pexpire | date("YYYY-MM-DD")}}
+                            </td>
+                            <td>
+                                {{product.pprice}}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+				<center>
+				<ul class="pagination" id="pagination"></ul>
+				</center>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var fixSearchTypeAndKeyword = function () {
+        var searchType = "{{cri.searchType}}";
+        var keyword = "{{cri.keyword}}";
+        $("#searchType option").each(function (i, obj) {
+            var value = $(this).val();
+            if (value == searchType) {
+                $(this).prop("selected", true);
+                return;
+            }
+        })
+        $("#keywordInput").val(keyword);
+    };
+    $(".productList").click(function () {
+        var id = $(this).attr("data-no");
+        location.href = "/manager/productDetail?id="+id;
+    })
+    $("#btnSearch").click(function () {
+        var searchType = $("#searchType option:selected").val();
+        var keyword = $("#keywordInput").val();
+        location.href = "/manager/productMngList?searchType=" + searchType + "&keyword=" + keyword;
+        //searchBoardController의 listPage GET 으로 받음
+    })
+    $("#btnRegister").click(function () {
+        location.href = "/manager/addProductForm";
+    })
+    fixSearchTypeAndKeyword();
+
+</script>
+
+{% block Pagination %} {%-
+include("../../include/pagination.html") %}
+{% endblock %} 
+
+
+{%- include ("../../include/footer.html") %}

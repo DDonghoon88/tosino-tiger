@@ -1,0 +1,119 @@
+{% extends 'tourlandLayout.html' %}
+
+{% block header %}
+{% include '../include/userHeader.html' %}
+{% endblock%}
+
+
+{% block loginScript %}
+<script  type="text/javascript">
+
+    $(document).ready(function(){
+
+            $("#btnLogin").click(function () {
+
+                const id = $("#id").val();
+                const pass = $("#pass").val();
+                axios({
+                    url: '/customer/loginForm', // 통신할 웹문서
+                    method: 'post', // 통신할 방식
+                    data: { // 인자로 보낼 데이터
+                      id: id,
+                      pass: pass
+                    },
+                    responseType:'json',
+                    responseEncoding:'utf-8'
+                  }).then((res)=>{
+                    console.log("axios1->", res);
+                    console.log("axios2->", res.data.responseText);
+                    console.log("axios3->", res.data.previousUrl);
+                    console.log("axios4->", res.status);
+
+                    if(res.data.responseText === "loginsuccess"){
+                        confirm("로그이 완료되었습니다.첫 페이지로 이동합니다.");
+                        location.href = encodeURI(res.data.previousUrl);
+                    }
+                  }) .catch((error)=> {
+                    console.log("555555->", error.response.status);
+                    if(error.response.status == 409){
+                        $("#errormsg").text(`탈퇴한 회원입니다. 재가입하세요.${error.response.statusText}`);
+                    }else{
+                        $("#errormsg").text(`인증에 실패했습니다. 재 시도 하세요..${error.response.statusText}`);
+                    }
+                })
+                  .finally(function () {
+                    // always executed
+                  });
+
+
+            })
+
+        }
+    );
+
+
+</script>
+
+{% endblock %}
+
+{% block loginSectionBlock %}
+<section>
+    <div id="loginHead">
+        <h1>로그인</h1>
+        <p>새로운 세상, 투어랜드</p>
+    </div>
+    <div id="loginBox">
+        <form>
+            <h2>투어랜드</h2>
+            <div id="loginInnerBox">
+                <div id="inputBox">
+                    {% if UserStay != null %}
+                    <input type="text" name="id" id="id" placeholder="아이디" value="{{UserStay.userid}}">
+                    <input type="password" name="pass" id="pass" placeholder="비밀번호"
+                           value="{{UserStay.userpass}}">
+                    {% else %}
+                        <input type="text" name="id" id="id" placeholder="아이디">
+                        <input type="password" name="pass" id="pass" placeholder="비밀번호">
+                    {% endif %}
+                </div>
+                <div id="submitBox">
+                    <input type="button" id="btnLogin" value="입력">
+                </div>
+                {% if error != null %}
+                    <p class="error">{{error }}</p>
+                {% endif %}
+            </div>
+            <div class='errormsg' id="errormsg"></div>
+        </form>
+        <div id="loginBtns">
+            <button id="join" style="cursor: pointer">회원가입</button>
+            <button id="findIDPW" style="cursor: pointer">아이디/비밀번호 찾기</button>
+        </div>
+        <div id="loginAPI">
+            <button id="naver" class="api" style="cursor: pointer">
+                <span>NAVER</span> 로그인
+            </button>
+            <button id="kakao" class="api" style="cursor: pointer">
+                <span>kakao</span> 로그인
+            </button>
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}
+
+{% block loginScriptButton %}
+<script>
+    $("#join").click(function () {
+        location.href = "/customer/tourlandRegister";
+    })
+    $("#findIDPW").click(function () {
+        location.href = "/customer/tourlandFindIdPw";
+    })
+</script>
+{% endblock %}
+
+{% block Footer %}
+{% include '../include/userFooter.html' %}
+{% endblock%}

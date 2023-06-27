@@ -1,0 +1,76 @@
+{%- include("../../include/header.html") %}
+<style>
+	.table th,td {
+		text-align: center;
+	}
+	.pagination {
+		margin : 0 auto;
+	}
+	.pagination li:hover {
+		cursor: pointer;
+	}
+	.active {
+		background-color : lightblue;
+		color : white;  
+	}
+	.faqList:hover {
+		cursor : pointer;
+		background-color : lightgrey;
+	}
+</style>
+<!-- <div id="opa">dummy</div> -->
+<div class="content">	
+	<div class="row">
+		<div class="col-sm-12">    
+			<div class="box box-primary">      
+				<div class="box-header">
+					<h2 class="box-title">FAQ 관리</h2>
+				</div>
+				<div class="box-body">
+				<!-- 검색 작업에서 유지될 데이터 
+					1. 현재 페이지의 번호     
+					2. 페이지당 보여지는 데이터의 수
+				 -->
+				</div>
+				<div class="box-body">
+					<button id="btnRegister">추가</button>
+				</div>
+				<div class="box-body">
+					<table class="table table-bordered">
+						<tr>
+							<th>번호</th>
+							<th>제목</th>
+						</tr>
+						{% for faq in lists  %}
+						<tr class="faqList" data-no="{{faq.no}}">
+							<td>{{faq.no}}</td>
+							<td><a href="/manager/FAQDetail?no={{faq.no}}&currentPage={{pagingData.currentPage}}">{{faq.title}}</a></td>
+						</tr>
+						{% endfor %}
+					</table>      
+				</div>
+
+
+				<center>
+				<ul class="pagination" id="pagination"></ul>
+				</center>
+
+
+			</div>         
+		</div>
+	</div>
+</div>
+
+<script>
+	$("#btnRegister").click(function(){
+		location.href = "FAQRegister";
+	})
+</script>
+
+
+{% block Pagination %} {%-
+include("../../include/pagination.html") %}
+{% endblock %} 
+
+
+{%- include("../../include/footer.html")%}

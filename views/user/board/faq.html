@@ -1,0 +1,182 @@
+{% extends 'boardlayout.html' %}
+
+{% block header %}
+{% include '../../include/userHeader.html' %}
+{% endblock%}
+
+
+{% block Stylesheet %}
+<style>
+    .FAQContent{
+        width: 100%;
+        height: auto;
+        display:none;
+        margin-bottom:10px;
+    }
+
+    section nav ul li:nth-child(2) {
+        background: mistyrose;
+    }
+
+</style>
+{% endblock %}
+
+{% block Section %}
+<section>
+    {%- include("../../include/userBoardMenu.html")%}
+    <div id="myreserv">
+        <h1>자주 묻는 질문</h1>
+        <table id="reserv">
+            <tr>
+                <th class="nono">번호</th>
+                <th class="thTitle">제목</th>
+                <th>대분류</th>
+                <th>분류</th>
+                <th class="lastTh">펼쳐보기</th>
+            </tr>
+            {% for faq in noticeLists  %}
+            <tr class="faqList" data-no="{{faq.no}}">
+                <td class="nono">{{faq.no}}</td>
+                <td class="thTitle" style="margin-top:15px;"><i class="fab fa-quora"></i>  {{faq.title}}
+                    <div class="FAQContent">
+                        <br><br>
+                        <i class="fas fa-bullhorn"></i>   {{faq.content}}
+                    </div>
+                </td>
+                <td>{% if fqa.lcate == "D" %}
+                    국내패키지상품
+                    {% elif  fqa.lcate == "I" %}
+                    해외패키지상품
+                    {% elif  fqa.lcate == "R" %}
+                    상품 예약 및 결제
+                    {% else %}
+                    회원혜택안내
+                    {% endif %}
+                </td>
+
+                <td>{% if fqa.mcate == "P" %}
+                    여행상품
+                    {% elif  fqa.mcate == "V" %}
+                    여권 및 비자
+                    {% elif  fqa.mcate == "T" %}
+                    환율
+                    {% elif  fqa.mcate == "J" %}
+                    제주여행
+                    {% elif  fqa.mcate == "B" %}
+                    예약 및 취소
+                    {% elif  fqa.mcate == "R" %}
+                    결제 및 환불
+                    {% elif  fqa.mcate == "C" %}
+                    쿠폰 및 이벤트
+                    {% else %}
+                    기타
+                    {% endif %}
+                </td>
+
+                <td><i class="fas fa-angle-down"></i></td>
+            </tr>
+
+            {% endfor %}
+        </table>
+
+	    <center><ul class="pagination" id="pagination"></ul></center>
+
+
+    </div>
+</section>
+{% endblock %}
+
+{% block Pagination %}
+{%- include("../../include/pagination.html") %}
+{% endblock %}
+
+{% block SearchScript %}
+
+<script>
+    const makeOption = function(searchType) {
+        let option = null;
+        let option1= null;
+        let option2= null;
+        let option3= null;
+        let option4= null;
+        switch(searchType) {
+            case "D":
+                option = $("<option value='J'>").html("제주여행");
+                $("#searchType2").append(option);
+                break;
+            case "I":
+                option = $("<option value=''>").html("전체");
+                option1 = $("<option value='P'>").html("여행상품");
+                option2 = $("<option value='V'>").html("여권 및 비자");
+                option3 = $("<option value='T'>").html("환율");
+                option4 = $("<option value='E'>").html("기타");
+                $("#searchType2").append(option).append(option1).append(option2).append(option3).append(option4);
+                break;
+            case "R":
+                option = $("<option value=''>").html("전체");
+                option1 = $("<option value='B'>").html("예약 및 취소");
+                option2 = $("<option value='R'>").html("결제 및 환불");
+                $("#searchType2").append(option).append(option1).append(option2);
+                break;
+            case "U":
+                option = $("<option value='C'>").html("쿠폰,이벤트");
+                $("#searchType2").append(option);
+                break;
+            default :
+                option = $("<option value=''>").html("-----------");
+                $("#searchType2").append(option);
+        }
+    }
+    const fixSearchTypeAndKeyword = function() {
+        let searchType = "{{cri.searchType}}";
+        let searchType2 = "{{cri.searchType2}}";
+        let keyword = "{{cri.keyword}}";
+        $("#searchType2").empty();
+        makeOption(searchType);
+        $("#searchType option").each(function(i, obj) {
+            let value = $(this).val();
+            if(value==searchType) {
+                $(this).prop("selected",true);
+                return;
+            }
+        })
+        $("#searchType2 option").each(function(i, obj) {
+            let value = $(this).val();
+            if(value==searchType2) {
+                $(this).prop("selected",true);
+                return;
+            }
+        })
+        $("#keywordInput").val(keyword);
+    };
+    $(document).on("click",".faqList",function(){
+        $(".FAQContent").css("display","none");
+        let no = $(this).attr("data-no");
+        $(this).children().children(".FAQContent").css("display","block");
+
+    })
+    $(document).on("click",".FAQContent",function(){
+        $(this).css("display","none");
+        return false;
+    })
+
+    $("#searchType").change(function() {
+        $("#searchType2").empty();
+        makeOption($("#searchType option:selected").val());
+        $("#keywordInput").val("");
+    })
+    $("#btnSearch").click(function(){
+        var searchType = $("#searchType option:selected").val();
+        var searchType2 = $("#searchType2 option:selected").val();
+        var keyword = $("#keywordInput").val();
+        location.href = "tourlandBoardFAQ?searchType="+searchType+"&searchType2="+searchType2+"&keyword="+keyword;
+        //searchBoardController의 listPage GET 으로 받음
+    })
+
+    fixSearchTypeAndKeyword();
+</script>
+{% endblock %}
+
+{% block Footer %}
+{% include '../../include/userFooter.html' %}
+{% endblock%}

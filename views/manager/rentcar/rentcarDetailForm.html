@@ -1,0 +1,227 @@
+{%- include ('../../include/header.html') %}
+<style>
+    label{
+        padding-bottom:6px;
+    }
+    .form-group{
+        float:left;
+        width: 300px;
+        margin: 20px 50px 20px 0px;
+    }
+    input[name='no']{
+        background: lightGray;
+        width:200px;
+    }
+    .noNameAddr{
+        height:105px;
+    }
+    .red{
+        color:red;
+    }
+    input[name='checkin'], input[name='checkout'], input[name='price'] {
+        width:262px;
+    }
+    [type="date"] {
+        background: #fff
+        url(https://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/calendar_2.png)
+        97% 50% no-repeat;
+    }
+
+    [type="date"]::-webkit-inner-spin-button {
+        display: none;
+    }
+
+    [type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0;
+    }
+
+    #rentcarForm input, select{
+        width: 300px;
+        margin-left:10px;
+    }
+
+
+</style>
+<script>
+    $(function(){
+        $(function() {
+            //달력을 오늘 이후로만 선택할 수 있게
+            var now = new Date();
+            var day = now.getDate();
+            var month = (now.getMonth() + 1);
+            var year = now.getFullYear();
+            if (day < 10) {
+                day = '0' + day;
+            }
+            if (month < 10) {
+                month = '0' + month;
+            }
+            today = year + '-' + month + '-' + day;
+            document.getElementById("checkin").setAttribute("min", today);
+        })
+
+        $(function(){
+            $("#checkin").change(function() {
+                //체크인 날짜가 선택되면 체크아웃은 체크인날짜 다음날부터 선택할 수 있게
+                var checkIn = document.getElementById("checkin").value;
+                var day = parseInt(checkIn.substr(8,10))+1;
+                if (day < 10) {
+                    day = '0' + day;
+                }
+                var result = checkIn.substr(0,7)+ '-' + day;
+                document.getElementById("checkout").setAttribute("min",result);
+            })
+        })
+
+        //리스트로 버튼 눌렀을 때 리스트로 돌아가기
+        $("#btnReturnToList").click(function(){
+            location.href="/manager/rentcarMngList";
+        })
+
+
+        $("#btnModify").click(function () {
+            $(".error").css("display", "none");
+            var id = $("input[name='id']").val();
+            var cdiv = $("select[name='cdiv']").val();
+            var cno = $("input[name='cno']").val();
+            var rentddate = $("input[name='rentddate']").val();
+            var returndate = $("input[name='returndate']").val();
+            var rentaddr = $("input[name='rentaddr']").val();
+            var returnaddr = $("input[name='returnaddr']").val();
+            var price = $("input[name='price']").val();
+            var capacity = $("select[name='capacity']").val();
+            var insurance = $("select[name='insurance']").val();
+            var ldiv = $("select[name='ldiv']").val();
+            var pdiv = $("select[name='pdiv']").val();
+
+
+            let data = {
+                id:id,
+                cdiv:cdiv,
+                cno:cno,
+                rentddate:rentddate,
+                returndate:returndate,
+                returnaddr:returnaddr,
+                price:price,
+                capacity:capacity,
+                insurance:insurance,
+                ldiv:ldiv,
+                pdiv:pdiv
+            }
+
+            $.ajax({
+                url: "/manager/rentcarDetailFormUpdate",
+                type: 'post',
+                traditional: true,
+                data: data,
+                dataType: "json",
+                success: function (res) {
+                    if (res.responseText === "modifyfaild") {
+                        $("#errormsg").text("오류발생.");
+                    }else if(res.responseText === "modifysuccess"){
+                        confirm("수정을 완료 했습니다. 이동합니다.");
+                        location.href = "/manager/rentcarMngList";
+                    }
+                    else return;
+                },
+                error: function (res) {
+                    console.log(res);
+                    if (res.responseText === "loginfail") {
+                        alert("로그인 실패");
+                        return;
+                    }
+                }
+            })
+        })
+    })
+</script>
+<div class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title">렌트카 상품 상세페이지</h3>
+                </div>
+                <form>
+                    <div class="box-body">
+                        <div class="noNameAddr">
+                            <label><span class="red">*</span>번호</label>
+                            <input type="text" name="id" class="form-control" value="{{rentcarVO.id}}" readonly>
+                        </div>
+                        <div class="noNameAddr">
+                            <label><span class="red">*</span>차 종류</label>
+                            <select name="cdiv" class="form-control" required="required" style="width:300px;">
+                                <option value="L" {% if rentcarVO.cdiv=='L' %}'selected' {%else%}''{%endif%}>경차</option>
+                                <option value="S" {% if rentcarVO.cdiv=='S' %}'selected' {%else%}''{%endif%}>세단</option>
+                                <option value="U" {% if rentcarVO.cdiv=='U' %}'selected' {%else%}''{%endif%}>SUV</option>
+                                <option value="V" {% if rentcarVO.cdiv=='V' %}'selected' {%else%}''{%endif%}>밴</option>
+                                <option value="B" {% if rentcarVO.cdiv=='B' %}'selected' {%else%}''{%endif%}>버스</option>
+                            </select>
+                        </div>
+                        <div class="noNameAddr">
+                            <label><span class="red">*</span>차번호</label>
+                            <input type="text" name="cno" class="form-control" required="required" value="{{rentcarVO.cno}}"/>					<!-- 리스트 불러오도록 할 것  -->
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>대여 날짜</label>
+                            <input type="date" name="rentddate" class="form-control"  required="required" id="checkin" value="{{rentcarVO.rentddate}}"/>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>반납 날짜</label>
+                            <input type="date" name="returndate" class="form-control" required="required" id="checkout" value="{{rentcarVO.returndate}}"/>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>대여장소</label>
+                            <input type="text" name="rentaddr" class="form-control" required="required" value="{{rentcarVO.rentaddr}}" />
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>반납장소</label>
+                            <input type="text" name="returnaddr" class="form-control" required="required" value="{{rentcarVO.returnaddr}}" />
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>가격</label>
+                            <input type="text" name="price" class="form-control" required="required" value="{{rentcarVO.price}}" />
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>허용인원 수</label>
+                            <select name="capacity" class="form-control"  required="required">
+                                <option value="4"  {%if rentcarVO.capacity=='4' %}'selected'{%else%}''{%endif%}>4명</option>
+                                <option value="6"  {%if rentcarVO.capacity=='6' %}'selected'{%else%}''{%endif%}>6명</option>
+                                <option value="10" {%if rentcarVO.capacity=='10'%}'selected'{%else%}''{%endif%}>10명</option>
+                                <option value="30" {%if rentcarVO.capacity=='30'%}'selected'{%else%}''{%endif%}>30명</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><span class="red">*</span>보험여부</label>
+                            <select name="insurance" class="form-control" id="ldiv" required="required">
+                                <option value="0" {%if rentcarVO.insurance=='0'%}'selected'{%else%}''{%endif%}>선택안함</option>
+                                <option value="1" {%if rentcarVO.insurance=='1'%}'selected'{%else%}''{%endif%}>포함</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>장소구분</label>
+                            <select name="ldiv" class="form-control" id="ldiv" required="required">
+                                <option value="0" {%if rentcarVO.ldiv=='0' %}'selected' {%else%}''{%endif%}>해외</option>
+                                <option value="1" {%if rentcarVO.ldiv=='0' %}'selected' {%else%}''{%endif%}>국내</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>상품구분</label>
+                            <select name="ldiv" class="form-control" id="pdiv" required="required">
+                                <option value="0" {%if rentcarVO.pdiv=='0' %}'selected' {%else%}''{%endif%}>패키지여행</option>
+                                <option value="1" {%if rentcarVO.pdiv=='0' %}'selected' {%else%}''{%endif%}>자유여행</option>
+                            </select>
+                        </div>
+
+                        <div class="box-footer" style="clear:both;">
+                            <input type="button" class="btn btn-primary" id="btnModify" value="수정"><br>
+                            <button type="button" class="btn btn-primary" id="btnReturnToList" style="margin-top:10px;">목록으로</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{%- include ('../../include/footer.html') %}

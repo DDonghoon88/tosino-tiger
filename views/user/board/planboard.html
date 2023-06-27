@@ -1,0 +1,226 @@
+{% extends 'boardlayout.html' %}
+{% block header %}
+{% include '../../include/userHeader.html' %}
+{% endblock%}
+{% block Section %}
+<section>
+  {%- include("../../include/userBoardMenu.html")%}
+  <div id="detailDiv">
+    <div style="width: 315px; height: 115px">
+      <br />
+      <p id="ptag">고객님들의 소중한 의견을 들려주세요.</p>
+      <br />
+    </div>
+    <div id="detailContent">
+      <form  action="">
+        <div class="box-body" style="text-align: center">
+          <select name="lcate" id="lcate">
+            <option value="">전체</option>
+            <option value="D">국내패키지상품</option>
+            <option value="I">해외패키지상품</option>
+            <option value="R">상품 예약 및 결제</option>
+            <option value="U">회원혜택안내</option>
+          </select>
+          <select name="mcate" id="mcate">
+            <option value="N">===========</option>
+          </select>
+        </div>
+        <div id="writerP">
+          <label>작성자</label>
+
+          {% if user !== undefined %}
+          <span>[ {{user.username}} ]</span>
+          <input type="hidden" name="username" id="username" value="{{user.username}}" />
+          <input
+                  type="hidden"
+                  name="userid"
+                  id="userid"
+                  class="form-control"
+                  value="{{user.userid}}"
+          />
+          {% else %}
+          <span></span>
+          <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  style="border: none; border-bottom: 1px solid black; width: 100px"
+          />
+          <input type="hidden" name="userid" id="userid" value="customer" class="form-control" />
+          {% endif %}
+        </div>
+        <div id="titlaP">
+          <label>제목</label>
+          <input
+                  type="text"
+                  name="title"
+                  id="title"
+                  class="form-control"
+                  required="required"
+                  style="border: none; border-bottom: 1px solid black; width: 400px"
+          />
+        </div>
+        <div>
+          <textarea
+                  rows="15"
+                  cols="100"
+                  style="margin-top: 10px"
+                  placeholder="  내용을 입력하세요"
+                  name="content"
+                  id="content"
+                  class="form-control"
+                  required="required"
+          ></textarea>
+        </div>
+<!--        <div>-->
+<!--          <label>비밀번호 설정</label>-->
+<!--          <input-->
+<!--                  type="text"-->
+<!--                  name="passwd"-->
+<!--                  class="form-control"-->
+<!--                  required="required"-->
+<!--          />-->
+<!--        </div>-->
+        <div style="text-align: center">
+          <button  class="btn btn-primary" id="boardRegister">
+            등록
+          </button>
+          <button class="btn btn-primary" id="btnReturnToList">
+            목록으로
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block SearchScript %}
+
+<script>
+  let option = null;
+  let option1 = null;
+  let option2 = null;
+  let option3 = null;
+  let option4 = null;
+  const makeDetailOption = function (lcate) {
+    switch (lcate) {
+      case "D":
+        option = $("<option value='J'>").html("제주여행");
+        $("#mcate").append(option);
+        break;
+      case "I":
+        option = $("<option value=''>").html("전체");
+        option1 = $("<option value='P'>").html("여행상품");
+        option2 = $("<option value='V'>").html("여권 및 비자");
+        option3 = $("<option value='T'>").html("환율");
+        option4 = $("<option value='E'>").html("기타");
+        $("#mcate")
+                .append(option)
+                .append(option1)
+                .append(option2)
+                .append(option3)
+                .append(option4);
+        break;
+      case "R":
+        option = $("<option value=''>").html("전체");
+        option1 = $("<option value='B'>").html("예약 및 취소");
+        option2 = $("<option value='R'>").html("결제 및 환불");
+        $("#mcate").append(option).append(option1).append(option2);
+        break;
+      case "U":
+        option = $("<option value='C'>").html("쿠폰,이벤트");
+        $("#mcate").append(option);
+        break;
+      default:
+        option = $("<option value=''>").html("-----------");
+        $("#mcate").append(option);
+    }
+  };
+  const fixSearchTypeAndKeyword = function () {
+    let lcate = "";
+    let mcate = "";
+    let keyword = "";
+    $("#mcate").empty();
+    makeOption(lcate);
+    $("#lcate option").each(function (i, obj) {
+      const value = $(this).val();
+      if (value == lcate) {
+        $(this).prop("selected", true);
+        return;
+      }
+    });
+    $("#mcate option").each(function (i, obj) {
+      const value = $(this).val();
+      if (value == mcate) {
+        $(this).prop("selected", true);
+        return;
+      }
+    });
+  };
+
+  $("#lcate").change(function () {
+    $("#mcate").empty();
+    makeDetailOption($("#lcate option:selected").val());
+  });
+
+
+</script>
+
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  const titleInput = document.getElementById("title");
+  const lcateInput = document.getElementById("lcate");
+  const mcateInput = document.getElementById("mcate");
+  const contentInput = document.getElementById("content");
+  const usernameInput = document.getElementById("username");
+  const useridInput = document.getElementById("userid");
+  const form = document.getElementById("form");
+  const btn = document.getElementById("boardRegister");
+
+
+  const btnlist = document.getElementById("btnReturnToList");
+
+  btnlist.addEventListener("click",(e)=>{
+    location.href="/plan/list";
+  });
+
+
+
+
+
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const title = titleInput.value;
+    const lcate = lcateInput.value;
+    const mcate = mcateInput.value;
+    const content = contentInput.value;
+    const username = usernameInput.value;
+    const userid = useridInput.value;
+    // const password = passwordInput.value;
+
+    console.log("axios --------1>", title);
+
+    await  axios.post("/plan/add", {
+      title,
+      lcate,
+      mcate,
+      content,
+      username,
+      userid
+    })
+            .then((response) => {
+              console.log("axios --------2>", response.data);
+              console.log(response);
+            });
+  });
+
+
+</script>
+
+{% endblock %}
+
+{% block Footer %}
+{% include '../../include/userFooter.html' %}
+{% endblock%}

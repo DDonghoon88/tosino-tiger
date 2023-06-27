@@ -1,0 +1,149 @@
+{%- include("../../include/header.html") %}
+<style>
+	.form-group input {
+		background-color: lightgray;
+	}
+
+	#small div {
+		float: left;
+		margin: 30px 30px;
+		width: 264px;
+	}
+
+	#goList {
+		width: 100px;
+		height: 32px;
+		position: relative;
+		top: -6px;
+		right: -35px;
+	}
+
+	#btnDelete {
+		margin-left: 10px;
+	}
+</style>
+<script>
+	$(function () {
+		$("#btnRespondAdd").click(function () {
+			let respondWriter = $("#respondWriter").val();
+			let respondcontent = $("#respondcontent").val();
+			var id = $("#dataNo").val();
+			let data = {
+				respondWriter: respondWriter,
+				respondcontent: respondcontent
+			}
+			$.ajax({
+				url: "/manager/planBoardModify/reply/" + id,
+				type: "post",
+				data: data,
+				dataType: "json",
+				success: function (res) {
+					console.log('---------', res);
+					if(res.responsetxt == "updatesuccess"){
+						location.href = "/manager/planBoardDetail?id={{plan.id}}";
+					}else{
+						$("#responsetxt").val("문제가 발생 했습니다. 관리자에 문의 하세요.");
+						// alert("수정을 완료했습니다.");
+					}
+				},
+				error: function (res) {
+					console.log("error------");
+
+				}
+
+			})
+
+		})
+		<!--$("#btnModSave").click(function(){-->
+		<!--	var text = $(this).parent().prev().find("#text").val();-->
+		<!--	var data = {"respondText":text};-->
+		<!--	var id = $("#dataNo").val();-->
+		<!--	alert(data.respondText);-->
+		<!--	$.ajax({-->
+		<!--		url:"/manager/planBoardModify/"+id,-->
+		<!--		type:"post",-->
+		<!--		data:data,-->
+		<!--		dataType:"json",-->
+		<!--		success:function(res){-->
+		<!--			console.log('-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;', res);-->
+		<!--			console.log('-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;', text);-->
+		<!--			$("#respondcontent").val(text);-->
+		<!--			alert("수정을 완료했습니다.");-->
+		<!--		}-->
+		<!--	})-->
+		<!--	location.href = "/manager/planBoardDetail?id={{plan.id}}";-->
+		<!--})-->
+	})
+</script>
+<form>
+	<div class="content">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="box box-primary">
+					<div class="box-header">
+						<h3 class="box-title">상품 문의사항</h3>
+					</div>
+					<div class="box-body">
+						<div class="form-group">
+							<input type="hidden" name="id" value="{{plan.id }}" class="form-control" id="dataNo">
+							<label>제목</label>
+							<input type="text" name="title" class="form-control" value="{{plan.title }}"
+								   readonly="readonly">
+						</div>
+						<div class="form-group">
+							<label>내용</label>
+							<textarea rows="15" cols="30" name="content" class="form-control"
+									  readonly="readonly">{{plan.content }}</textarea>
+						</div>
+						<div id="small">
+							<div class="form-group">
+								<label>작성자</label>
+								<input type="text" readonly="readonly" value="{{plan.writer}}" class="form-control"
+									   style="width:200px;">
+							</div>
+							<div class="form-group">
+								<label>작성일자</label>
+								<input type="text" readonly="readonly" value="{{plan.regdate }}" class="form-control"
+									   style="width:200px;">
+							</div>
+							<div class="form-group">
+								<label>답변여부</label>
+								<input type="text" readonly="readonly" value="{% if plan.answer=='0' %} 답변미완료 {%else %} 답변완료  {%endif%}"
+									   class="form-control" style="width:200px;">
+							</div>
+						</div>
+					</div>
+					<div class="box-footer"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="content">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-success parent">
+					<div class="box-header point">
+						<h3 class="box-title">답변 작성</h3>
+					</div>
+					<div class="box-body point">
+						<label>작성자<-사원명 !!!</label>
+						<input type="text" class="form-control" value="{{user.username}}" id="respondWriter"
+							   name="respondWriter" readonly="readonly">
+						<label>답변</label>
+						<textarea rows="5" cols="30" class="form-control" id="respondcontent" name="respondcontent"
+								  placeholder="답변내용">{{plan.respond}}</textarea>
+					</div>
+					<div id="responsetxt"></div>
+					<div class="box-footer point">
+<!--						<button class="btn btn-primary" id="btnUpdate" >수정하기 </button>-->
+						<button class="btn btn-primary" id="btnRespondAdd">등록</button>
+						<button class="btn btn-warning active"><a href="/manager/planBoardList">돌아가기</a></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</form>
+{%- include("../../include/footer.html") %}
